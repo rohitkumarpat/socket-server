@@ -127,6 +127,33 @@ io.on("connection", (socket) => {
     }
   });
 
+
+
+  socket.on("joinroom", (roomid) => {
+    console.log("room join ",roomid);
+    socket.join(roomid);
+
+  });
+
+ socket.on("send-message", async (msg) => {
+  console.log("message received in socket server", msg);
+
+  try {
+    // console.log("Calling API:", `${process.env.NEXT_BASE_URL}/api/chat/save`);
+
+    const response = await axios.post(
+      `${process.env.NEXT_BASE_URL}/api/chat/save`,
+      msg
+    );
+
+    // console.log("API SUCCESS:", response.data);
+
+    io.to(msg.roomid).emit("send-message", msg);
+  } catch (error) {
+    console.error("API ERROR:", error.response?.data || error.message);
+  }
+});
+  
   socket.on("disconnect", (reason) => {
     console.warn("[socketserver] user disconnected", {
       socketId: socket.id,
